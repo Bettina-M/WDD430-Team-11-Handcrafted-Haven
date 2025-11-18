@@ -4,13 +4,42 @@
   font-family: Georgia, serif;
   background-color: #fffaf3;
   min-height: 100vh;
-  padding: 4rem 2rem;
+  padding: 0;
   text-align: center;
   color: #3d2b1f;
 }
 
+.nav {
+  background-color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.navLinks {
+  display: flex;
+  gap: 1rem;
+}
+
+.authLink {
+  background-color: #c87b5e;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.authLink:hover {
+  background-color: #a86649;
+}
+
 .header {
+  margin-top: 3rem;
   margin-bottom: 3rem;
+  padding: 0 2rem;
 }
 
 .title {
@@ -27,6 +56,10 @@
 
 .buttons {
   margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .primaryButton {
@@ -37,7 +70,13 @@
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   cursor: pointer;
-  margin-right: 1rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s;
+}
+
+.primaryButton:hover {
+  background-color: #a86649;
 }
 
 .secondaryButton {
@@ -48,10 +87,20 @@
   font-size: 1rem;
   cursor: pointer;
   color: #c87b5e;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s;
+}
+
+.secondaryButton:hover {
+  background-color: #c87b5e;
+  color: white;
 }
 
 .section {
   margin-top: 5rem;
+  padding: 0 2rem;
+  padding-bottom: 3rem;
 }
 
 .sectionTitle {

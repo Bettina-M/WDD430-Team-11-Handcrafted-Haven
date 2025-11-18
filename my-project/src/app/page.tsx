@@ -1,9 +1,16 @@
-//import Image from "next/image";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function HomePage() {
   return (
     <main className={styles.main}>
+      {/* Navigation */}
+      <nav className={styles.nav}>
+        <div className={styles.navLinks}>
+          <Link href="/auth" className={styles.authLink}>Login / Register</Link>
+        </div>
+      </nav>
+
       {/* Header */}
       <header className={styles.header}>
         <h1 className={styles.title}>🎁 Handcrafted Haven</h1>
@@ -16,8 +23,8 @@ export default function HomePage() {
 
       {/* Call to Action Buttons */}
       <div className={styles.buttons}>
-        <button className={styles.primaryButton}>Explore the Marketplace</button>
-        <button className={styles.secondaryButton}>Become a Seller</button>
+        <Link href="/auth" className={styles.primaryButton}>Explore the Marketplace</Link>
+        <Link href="/auth" className={styles.secondaryButton}>Become a Seller</Link>
       </div>
 
       {/* Features Section */}

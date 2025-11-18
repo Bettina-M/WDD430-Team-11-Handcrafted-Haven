@@ -29,7 +29,7 @@ export default function RootLayout({
             <li><Link href="/marketplace">Marketplace</Link></li>
             <li><Link href="/about">About</Link></li>
             <li><Link href="/contact">Contact</Link></li>
-            <li><Link href="/login">Login</Link></li>
+            <li><Link href="/auth">Login</Link></li>
           </ul>
         </nav>
         {/* ✅ PAGE CONTENT */}

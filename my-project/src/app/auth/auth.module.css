@@ -1,0 +1,46 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1rem;
+}
+
+.authBox {
+  width: 100%;
+  max-width: 450px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.tabs {
+  display: flex;
+  background: #f5f5f5;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.tab:hover {
+  background: #ebebeb;
+  color: #333;
+}
+
+.activeTab {
+  background: white !important;
+  color: #0070f3 !important;
+  border-bottom: 3px solid #0070f3;
+}
