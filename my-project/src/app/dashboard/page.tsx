@@ -50,6 +50,20 @@ export default function DashboardPage() {
       </div>
     );
   }
+  //This leads to create profile page
+  
+  const handleCreateProfile = () => {
+    // Navigate to the create profile page
+    router.push('/create-profile');
+  };
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>Loading...</div>
+      </div>
+    );
+  }
 
   if (!user) {
     return null;
@@ -75,11 +89,42 @@ export default function DashboardPage() {
             </div>
           </div>
 
+
           <div className={styles.card}>
             <h2>Your Account</h2>
             <p>You have successfully logged in to Handcrafted Haven!</p>
             <p>This is a protected dashboard page that requires authentication.</p>
           </div>
+
+          <div className={styles.card}>
+            <h2>Complete Your Profile</h2>
+            <p>Welcome to Handcrafted Haven! To get the most out of your experience, please complete your profile.</p>
+            <button 
+              onClick={handleCreateProfile} 
+              className={styles.createProfileButton}
+            >
+              {user.name}, create your profile
+            </button>
+          </div>
+
+          <div className={styles.card}>
+            <h2>Seller Tools</h2>
+            <p>Manage your handcrafted items and seller profile.</p>
+            <div className={styles.buttonGroup}>
+              <button 
+                onClick={() => router.push('/seller-dashboard')} 
+                className={styles.primaryButton}
+              >
+                View Seller Dashboard
+              </button>
+              <button 
+                onClick={() => router.push('/add-product')} 
+                className={styles.secondaryButton}
+              >
+                Add New Product
+              </button>
+          </div>
+        </div>
         </div>
       </div>
     </div>
