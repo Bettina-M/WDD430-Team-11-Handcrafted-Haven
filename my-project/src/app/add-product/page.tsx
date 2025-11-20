@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './add-product.module.css';
-import { User, SellerProfile, Product } from '../../types';
-
+import { User, SellerProfile, Product } from '@/types';
 
 interface ProductFormData {
   name: string;
@@ -21,14 +20,13 @@ interface ProductFormData {
   isActive: boolean;
 }
 
-
-
 export default function AddProductPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [sellerProfile, setSellerProfile] = useState<SellerProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
@@ -46,7 +44,7 @@ export default function AddProductPage() {
 
   const [currentMaterial, setCurrentMaterial] = useState('');
   const [currentTag, setCurrentTag] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -65,8 +63,8 @@ export default function AddProductPage() {
     }
 
     try {
-      const parsedUser = JSON.parse(userData);
-      const parsedProfile = JSON.parse(profile);
+      const parsedUser: User = JSON.parse(userData);
+      const parsedProfile: SellerProfile = JSON.parse(profile);
       setUser(parsedUser);
       setSellerProfile(parsedProfile);
     } catch (error) {
@@ -119,14 +117,58 @@ export default function AddProductPage() {
     }));
   };
 
-  const addImage = () => {
-    if (imageUrl.trim() && !formData.images.includes(imageUrl.trim())) {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+
+    try {
+      const newImages: string[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+          alert('Please upload only image files');
+          continue;
+        }
+
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Image size should be less than 5MB');
+          continue;
+        }
+
+        const base64 = await convertToBase64(file);
+        newImages.push(base64);
+      }
+
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, imageUrl.trim()]
+        images: [...prev.images, ...newImages]
       }));
-      setImageUrl('');
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      alert('Error uploading images. Please try again.');
+    } finally {
+      setUploading(false);
     }
+  };
+
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
   };
 
   const removeImage = (image: string) => {
@@ -141,17 +183,17 @@ export default function AddProductPage() {
     setIsSubmitting(true);
 
     try {
-      const productData = {
+      const productData: Product = {
         ...formData,
         id: `prod_${Date.now()}`,
-        sellerId: user?.id,
-        sellerName: user?.name,
-        shopName: sellerProfile?.shopName,
+        sellerId: user?.id || '',
+        sellerName: user?.name || '',
+        shopName: sellerProfile?.shopName || '',
         createdAt: new Date().toISOString()
       };
 
       // Get existing products or initialize empty array
-      const existingProducts = JSON.parse(localStorage.getItem('products') || '[]');
+      const existingProducts: Product[] = JSON.parse(localStorage.getItem('products') || '[]');
       const updatedProducts = [...existingProducts, productData];
       
       localStorage.setItem('products', JSON.stringify(updatedProducts));
@@ -335,37 +377,56 @@ export default function AddProductPage() {
             <h2>Product Images</h2>
             
             <div className={styles.formGroup}>
-              <label>Add Image URLs</label>
-              <div className={styles.tagInput}>
+              <label>Upload Images *</label>
+              <div className={styles.uploadArea}>
                 <input
-                  type="url"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
-                  placeholder="https://example.com/image.jpg"
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className={styles.fileInput}
+                  id="file-upload"
                 />
-                <button type="button" onClick={addImage} className={styles.addButton}>
-                  Add
-                </button>
+                <label htmlFor="file-upload" className={styles.uploadLabel}>
+                  <div className={styles.uploadContent}>
+                    <div className={styles.uploadIcon}>📁</div>
+                    <div className={styles.uploadText}>
+                      <strong>Click to upload images</strong>
+                      <span>or drag and drop</span>
+                      <small>PNG, JPG, GIF up to 5MB each</small>
+                    </div>
+                  </div>
+                </label>
+                {uploading && (
+                  <div className={styles.uploading}>Uploading images...</div>
+                )}
               </div>
-            </div>  
-          </div>
-            <div className={styles.imagePreviews}>
-              {formData.images.map((image, index) => (
-                <div key={index} className={styles.imagePreview}>
-                  <Image
-                    src={image}
-                    alt={`Preview ${index + 1}`}
-                    width={100}
-                    height={100}
-                    className={styles.previewImage}
-                    placeholder="blur"
-                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
-                  />
-                  <button type="button" onClick={() => removeImage(image)}>Remove</button>
+              
+              {formData.images.length > 0 && (
+                <div className={styles.imagePreviews}>
+                  {formData.images.map((image, index) => (
+                    <div key={index} className={styles.imagePreview}>
+                      <Image
+                        src={image}
+                        alt={`Preview ${index + 1}`}
+                        width={100}
+                        height={100}
+                        className={styles.previewImage}
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => removeImage(image)}
+                        className={styles.removeImageBtn}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
+          </div>
 
           {/* Tags */}
           <div className={styles.section}>
@@ -408,7 +469,7 @@ export default function AddProductPage() {
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={isSubmitting}
+              disabled={isSubmitting || uploading}
             >
               {isSubmitting ? 'Adding Product...' : 'Add Product'}
             </button>
@@ -416,8 +477,5 @@ export default function AddProductPage() {
         </form>
       </div>
     </div>
- 
   );
-  }
-
-  
+}

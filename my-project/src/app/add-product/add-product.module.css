@@ -132,7 +132,7 @@
 }
 
 .addButton {
-  background: #667eea;
+  background: #c87b5e;
   color: white;
   border: none;
   padding: 12px 20px;
@@ -408,5 +408,139 @@
   .section {
     margin-bottom: 30px;
     padding-bottom: 20px;
+  }
+}
+
+/* File Upload Styles */
+.uploadArea {
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+}
+
+.uploadArea:hover {
+  border-color: #667eea;
+  background: #f1f5f9;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadLabel {
+  display: block;
+  cursor: pointer;
+  text-align: center;
+}
+
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.uploadIcon {
+  font-size: 2rem;
+}
+
+.uploadText {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.uploadText strong {
+  color: #374151;
+  font-size: 1.1rem;
+}
+
+.uploadText span {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.uploadText small {
+  color: #9ca3af;
+  font-size: 0.8rem;
+}
+
+.uploading {
+  text-align: center;
+  color: #667eea;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+/* Enhanced Image Preview Styles */
+.imagePreviews {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.imagePreview {
+  position: relative;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  aspect-ratio: 1;
+}
+
+.imagePreview:hover {
+  border-color: #667eea;
+  transform: scale(1.05);
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removeImageBtn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.removeImageBtn:hover {
+  background: #dc2626;
+}
+
+/* Drag and Drop States */
+.uploadArea.dragOver {
+  border-color: #667eea;
+  background: #e0e7ff;
+}
+
+/* Responsive adjustments for file upload */
+@media (max-width: 768px) {
+  .uploadContent {
+    padding: 15px;
+  }
+  
+  .uploadText strong {
+    font-size: 1rem;
+  }
+  
+  .imagePreviews {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
 }
