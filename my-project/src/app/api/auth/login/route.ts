@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     const token = generateToken({
       userId: user.id,
       email: user.email,
-      name: user.name,
+      name: user.name??'',
     });
 
     // Return success response with token
