@@ -29,7 +29,6 @@ export async function POST(request: NextRequest) {
 
     // Create user
     const newUser = await createUser({
-      id: crypto.randomUUID(),
       email,
       password: hashedPassword,
       name,
@@ -39,7 +38,7 @@ export async function POST(request: NextRequest) {
     const token = generateToken({
       userId: newUser.id,
       email: newUser.email,
-      name: newUser.name,
+      name: newUser.name?? '',
     });
 
     // Return success response with token
