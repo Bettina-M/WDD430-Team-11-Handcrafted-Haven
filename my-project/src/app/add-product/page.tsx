@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './add-product.module.css';
 import { User, SellerProfile, Product } from '@/types';
+import { createProduct } from '@/lib/products';
 
 interface ProductFormData {
   name: string;
@@ -180,23 +181,28 @@ export default function AddProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    if (!user?.id || !sellerProfile?.id) {
+      alert('User or seller profile not found');
+      return;
+    }
+    
+    if (formData.images.length === 0) {
+      alert('Please upload at least one product image');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const productData: Product = {
+      // Create product in database
+      await createProduct({
         ...formData,
-        id: `prod_${Date.now()}`,
-        sellerId: user?.id || '',
-        sellerName: user?.name || '',
-        shopName: sellerProfile?.shopName || '',
-        createdAt: new Date().toISOString()
-      };
-
-      // Get existing products or initialize empty array
-      const existingProducts: Product[] = JSON.parse(localStorage.getItem('products') || '[]');
-      const updatedProducts = [...existingProducts, productData];
-      
-      localStorage.setItem('products', JSON.stringify(updatedProducts));
+        sellerId: sellerProfile.id, // Use sellerProfile ID, not user ID
+        sellerName: user.name || '',
+        shopName: sellerProfile.shopName || ''
+      });
       
       alert('Product added successfully!');
       router.push('/seller-dashboard');
@@ -207,6 +213,7 @@ export default function AddProductPage() {
       setIsSubmitting(false);
     }
   };
+
 
   const categories = [
     'Jewelry & Accessories',

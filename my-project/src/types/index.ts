@@ -7,6 +7,7 @@ export interface User {
 }
 
 export interface SellerProfile {
+  id: string;
   shopName: string;
   bio: string;
   specialization: string;

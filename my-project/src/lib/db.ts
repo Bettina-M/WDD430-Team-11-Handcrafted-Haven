@@ -1,18 +1,26 @@
-import { User } from './auth';
+import { PrismaClient } from '@prisma/client'
 
-// In-memory database for demonstration
-// In production, use a real database like PostgreSQL, MongoDB, etc.
-const users: User[] = [];
-
-export async function findUserByEmail(email: string): Promise<User | undefined> {
-  return users.find(user => user.email === email);
+const globalForPrisma = global as unknown as {
+  prisma: PrismaClient | undefined
 }
 
-export async function createUser(user: User): Promise<User> {
-  users.push(user);
-  return user;
+export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+// Your existing functions, now using Prisma
+export async function findUserByEmail(email: string) {
+  return await prisma.user.findUnique({
+    where: { email }
+  });
 }
 
-export async function getAllUsers(): Promise<User[]> {
-  return users;
+export async function createUser(userData: { email: string; name?: string; password: string }) {
+  return await prisma.user.create({
+    data: userData
+  });
+}
+
+export async function getAllUsers() {
+  return await prisma.user.findMany();
 }

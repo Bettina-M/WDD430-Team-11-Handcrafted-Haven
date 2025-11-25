@@ -7,7 +7,7 @@ const protectedRoutes = ['/dashboard', '/profile', '/settings'];
 // Add routes that should redirect to dashboard if already authenticated
 const authRoutes = ['/auth', '/login', '/register'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Get token from cookies (if you switch to cookie-based auth)
