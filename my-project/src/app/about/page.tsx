@@ -5,14 +5,14 @@ export default function AboutPage() {
   return (
     <div className={styles["about-container"]}>
       <section className={styles["hero"]}>
-        <h1>About Craft Haven</h1>
+        <h1>About Handcrafted Haven</h1>
         <p>Your home for unique, handcrafted creations made with passion and purpose.</p>
       </section>
 
       <section className={styles["content"]}>
         <h2>Our Story</h2>
         <p>
-          Craft Haven was built to celebrate artisans — the talented creators who pour time,
+          Handcrafted Haven was built to celebrate artisans — the talented creators who pour time,
           creativity, and dedication into every handmade piece. We believe handcrafted goods
           should be accessible to everyone, and artisans should have a place that truly values
           their work.

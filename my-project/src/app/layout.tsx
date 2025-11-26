@@ -3,6 +3,8 @@
 import "./globals.css";
 import styles from './layout.module.css';
 import Link from 'next/link';
+import Navbar from "../components/Navbar"
+
 
 
 export const metadata ={
@@ -10,7 +12,7 @@ export const metadata ={
   description: "Discover a world of creativity and craftsmanship at Handcrafted Haven."
 }
 
-export default function RootLayout({
+/*export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -18,8 +20,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={styles.body}>
-        {/* ✅ NAVBAR */}
-        <nav className={styles.navbar}>
+        {/* ✅ NAVBAR */
+        /*<nav className={styles.navbar}>
           <div className={styles.logo}>
             <Link href="/">🎁 Handcrafted Haven</Link>
           </div>
@@ -32,10 +34,20 @@ export default function RootLayout({
             <li><Link href="/auth">Login</Link></li>
           </ul>
         </nav>
-        {/* ✅ PAGE CONTENT */}
+        {/* ✅ PAGE CONTENT */
+       /* <main className={styles.main}>{children}</main>
+      </body>
+    </html>
+  );
+}*/
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body className={styles.body}>
+        <Navbar />   {/* <-- Responsive navbar */}
         <main className={styles.main}>{children}</main>
       </body>
     </html>
   );
 }
-
