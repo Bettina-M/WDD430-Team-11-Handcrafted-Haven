@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import styles from './marketplace.module.css';
+import { getAllActiveProducts } from '@/lib/marketplace';
 
 interface Product {
   id: string;
@@ -24,13 +25,42 @@ export default function MarketplacePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const productsData = JSON.parse(localStorage.getItem('products') || '[]');
-    const activeProducts = productsData.filter((product: Product) => product.isActive);
-    setTimeout(() => {
-      setProducts(activeProducts);
-    }, 0);
+    async function fetchProducts() {
+      try {
+        setIsLoading(true);
+        const productsData = await getAllActiveProducts();
+        
+        // Transform the data to match your existing Product interface
+        const transformedProducts: Product[] = productsData.map(product => ({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          category: product.category,
+          materials: product.materials,
+          images: product.images,
+          stock: product.stock,
+          tags: product.tags,
+          isActive: product.isActive,
+          sellerName: product.seller.user.name || 'Unknown Artist',
+          shopName: product.seller.shopName,
+          createdAt: product.createdAt.toISOString()
+        }));
+        
+        setProducts(transformedProducts);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError('Failed to load products. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchProducts();
   }, []);
 
   const filteredProducts = useMemo(() => {
@@ -56,6 +86,31 @@ export default function MarketplacePage() {
     ['All', ...Array.from(new Set(products.map(p => p.category)))],
     [products]
   );
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.error}>
+          <h2>Error</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className={styles.retryButton}>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <h2>Loading Marketplace...</h2>
+          <p>Discovering beautiful handcrafted items...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>

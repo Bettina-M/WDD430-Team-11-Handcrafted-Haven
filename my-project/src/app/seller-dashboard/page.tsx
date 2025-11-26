@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './seller-dashboard.module.css';
 import { User, SellerProfile, Product } from '../../types';
+import { getSellerProducts, toggleProductStatus, deleteProductFromDB, getSellerStats } from '@/lib/seller'; // or '@/lib/products'
 
 export default function SellerDashboardPage() {
   const router = useRouter();
@@ -13,6 +14,11 @@ export default function SellerDashboardPage() {
   const [sellerProfile, setSellerProfile] = useState<SellerProfile | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    activeListings: 0,
+    totalValue: 0
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -29,57 +35,110 @@ export default function SellerDashboardPage() {
       return;
     }
 
-    try {
-      const parsedUser: User = JSON.parse(userData);
-      const parsedProfile: SellerProfile = JSON.parse(profile);
-      const productsData: Product[] = JSON.parse(localStorage.getItem('products') || '[]');
-      
-      // Filter products for this seller
-      const sellerProducts = productsData.filter((product: Product) => product.sellerId === parsedUser.id);
-      
-      setUser(parsedUser);
-      setSellerProfile(parsedProfile);
-      setProducts(sellerProducts);
-    } catch (error) {
-      console.error('Error parsing data:', error);
-    } finally {
-      setIsLoading(false);
+    async function fetchData() {
+      try {
+        const parsedUser: User = JSON.parse(userData!);
+        const parsedProfile: SellerProfile = JSON.parse(profile!);
+        
+        setUser(parsedUser);
+        setSellerProfile(parsedProfile);
+
+        // Fetch products and stats from database
+        const [sellerProducts, sellerStats] = await Promise.all([
+          getSellerProducts(parsedProfile.id), // Use sellerProfile ID, not user ID
+          getSellerStats(parsedProfile.id)
+        ]);
+
+        // Transform products to match your interface
+        const transformedProducts: Product[] = sellerProducts.map(product => ({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          category: product.category,
+          materials: product.materials,
+          dimensions: product.dimensions || '',
+          weight: product.weight || '',
+          images: product.images,
+          stock: product.stock,
+          tags: product.tags,
+          isActive: product.isActive,
+          sellerId: product.sellerId,
+          sellerName: product.sellerName,
+          shopName: product.shopName,
+          createdAt: product.createdAt.toISOString()
+        }));
+
+        setProducts(transformedProducts);
+        setStats(sellerStats);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        alert('Error loading dashboard data');
+      } finally {
+        setIsLoading(false);
+      }
     }
+
+    fetchData();
   }, [router]);
 
-  const toggleProductStatus = (productId: string) => {
-    const updatedProducts = products.map(product => 
-      product.id === productId 
-        ? { ...product, isActive: !product.isActive }
-        : product
-    );
-    
-    setProducts(updatedProducts);
-    
-    // Update localStorage
-    const allProducts: Product[] = JSON.parse(localStorage.getItem('products') || '[]');
-    const updatedAllProducts = allProducts.map((product: Product) => 
-      product.id === productId 
-        ? { ...product, isActive: !product.isActive }
-        : product
-    );
-    localStorage.setItem('products', JSON.stringify(updatedAllProducts));
+  const handleToggleProductStatus = async (productId: string, currentStatus: boolean) => {
+    try {
+      await toggleProductStatus(productId, !currentStatus);
+      
+      // Update local state
+      setProducts(prev => prev.map(product => 
+        product.id === productId 
+          ? { ...product, isActive: !currentStatus }
+          : product
+      ));
+
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        activeListings: currentStatus ? prev.activeListings - 1 : prev.activeListings + 1
+      }));
+
+    } catch (error) {
+      console.error('Error toggling product status:', error);
+      alert('Error updating product status');
+    }
   };
 
-  const deleteProduct = (productId: string) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      const updatedProducts = products.filter(product => product.id !== productId);
-      setProducts(updatedProducts);
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await deleteProductFromDB(productId);
       
-      // Update localStorage
-      const allProducts: Product[] = JSON.parse(localStorage.getItem('products') || '[]');
-      const updatedAllProducts = allProducts.filter((product: Product) => product.id !== productId);
-      localStorage.setItem('products', JSON.stringify(updatedAllProducts));
+      // Update local state
+      const deletedProduct = products.find(p => p.id === productId);
+      setProducts(prev => prev.filter(product => product.id !== productId));
+
+      // Update stats
+      setStats(prev => ({
+        totalProducts: prev.totalProducts - 1,
+        activeListings: deletedProduct?.isActive ? prev.activeListings - 1 : prev.activeListings,
+        totalValue: prev.totalValue - (deletedProduct?.price || 0)
+      }));
+
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Error deleting product');
     }
   };
 
   if (isLoading) {
-    return <div className={styles.loading}>Loading...</div>;
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <h2>Loading Dashboard...</h2>
+          <p>Getting your seller information...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -105,18 +164,16 @@ export default function SellerDashboardPage() {
         <div className={styles.stats}>
           <div className={styles.statCard}>
             <h3>Total Products</h3>
-            <p className={styles.statNumber}>{products.length}</p>
+            <p className={styles.statNumber}>{stats.totalProducts}</p>
           </div>
           <div className={styles.statCard}>
             <h3>Active Listings</h3>
-            <p className={styles.statNumber}>
-              {products.filter(p => p.isActive).length}
-            </p>
+            <p className={styles.statNumber}>{stats.activeListings}</p>
           </div>
           <div className={styles.statCard}>
             <h3>Total Value</h3>
             <p className={styles.statNumber}>
-              ${products.reduce((total, product) => total + product.price, 0).toFixed(2)}
+              ${stats.totalValue.toFixed(2)}
             </p>
           </div>
         </div>
@@ -178,13 +235,13 @@ export default function SellerDashboardPage() {
                   
                   <div className={styles.productActions}>
                     <button
-                      onClick={() => toggleProductStatus(product.id)}
+                      onClick={() => handleToggleProductStatus(product.id, product.isActive)}
                       className={product.isActive ? styles.deactivateBtn : styles.activateBtn}
                     >
                       {product.isActive ? 'Deactivate' : 'Activate'}
                     </button>
                     <button
-                      onClick={() => deleteProduct(product.id)}
+                      onClick={() => handleDeleteProduct(product.id)}
                       className={styles.deleteBtn}
                     >
                       Delete
@@ -205,14 +262,11 @@ export default function SellerDashboardPage() {
                 Edit Profile
               </Link>
             </div>
-            <p className={styles.specialization}>
-              Specialization: {sellerProfile?.specialization}
-            </p>
-            <p className={styles.bio}>{sellerProfile?.bio}</p>
+            {sellerProfile?.bio && (
+              <p className={styles.bio}>{sellerProfile.bio}</p>
+            )}
             <div className={styles.profileDetails}>
-              <span>📍 {sellerProfile?.location}</span>
-              <span>📧 {sellerProfile?.contactEmail}</span>
-              {sellerProfile?.phoneNumber && <span>📞 {sellerProfile.phoneNumber}</span>}
+              <span>Member since: {new Date(sellerProfile?.createdAt || '').toLocaleDateString()}</span>
             </div>
           </div>
         </div>

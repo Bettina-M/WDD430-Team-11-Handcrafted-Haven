@@ -523,3 +523,13 @@
     padding: 0 15px 15px;
   }
 }
+
+.loading {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.loading h2 {
+  color: #333;
+  margin-bottom: 1rem;
+}

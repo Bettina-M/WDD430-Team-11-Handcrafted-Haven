@@ -1,22 +1,23 @@
+// src/app/api/auth/register/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { hashPassword, generateToken } from '@/lib/auth';
-import { createUser, findUserByEmail } from '@/lib/db';
+import { findUserByEmail, createUser } from '@/lib/db'; // or '@/lib/auth-db'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email, password, name } = body;
+    const { email, password, name } = await request.json();
 
     // Validate input
-    if (!email || !password || !name) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email, password, and name are required' },
+        { error: 'Email and password are required' },
         { status: 400 }
       );
     }
 
     // Check if user already exists
     const existingUser = await findUserByEmail(email);
+    
     if (existingUser) {
       return NextResponse.json(
         { error: 'User already exists' },
@@ -27,33 +28,28 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create user
-    const newUser = await createUser({
+    // Create user in database
+    const user = await createUser({
       email,
-      password: hashedPassword,
       name,
+      password: hashedPassword
     });
 
-    // Generate JWT token
+    // Generate token
     const token = generateToken({
-      userId: newUser.id,
-      email: newUser.email,
-      name: newUser.name?? '',
-    });
+    userId: user.id,
+    email: user.email,
+    name: user.name ?? ''
+  });
+    // Return user data (excluding password) and token
+    const { password: _, ...userWithoutPassword } = user;
+    
+    return NextResponse.json({
+      message: 'User created successfully',
+      token,
+      user: userWithoutPassword
+    }, { status: 201 });
 
-    // Return success response with token
-    return NextResponse.json(
-      {
-        message: 'Registration successful',
-        user: {
-          id: newUser.id,
-          email: newUser.email,
-          name: newUser.name,
-        },
-        token,
-      },
-      { status: 201 }
-    );
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(
