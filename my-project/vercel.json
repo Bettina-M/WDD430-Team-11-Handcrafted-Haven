@@ -1,12 +1,6 @@
 {
-  "version": 2,
-  "buildCommand": "pnpm build",
-  "devCommand": "pnpm dev",
-  "installCommand": "pnpm install",
-  "framework": "nextjs",
-  "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret",
-    "NODE_ENV": "production"
-  }
+  "buildCommand": "cd my-project && pnpm build",
+  "devCommand": "cd my-project && pnpm dev",
+  "installCommand": "cd my-project && pnpm install",
+  "outputDirectory": "my-project/.next"
 }
