@@ -5,12 +5,14 @@ import Product from '@/models/Product';
 // GET single product by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } 
 ) {
   try {
     await connectDB();
+    
+    const { id } = await params;
 
-    const product = await Product.findById(params.id);
+    const product = await Product.findById(id);
 
     if (!product) {
       return NextResponse.json(
@@ -32,15 +34,17 @@ export async function GET(
 // PUT update product by ID
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
+    const { id } = await params; 
+
     const body = await request.json();
 
     const product = await Product.findByIdAndUpdate(
-      params.id,
+      id,
       { $set: body },
       { new: true, runValidators: true }
     );
@@ -53,10 +57,14 @@ export async function PUT(
     }
 
     return NextResponse.json({ success: true, product }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating product:', error);
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'Failed to update product';
+    
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to update product' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
@@ -65,12 +73,14 @@ export async function PUT(
 // DELETE product by ID
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const product = await Product.findByIdAndDelete(params.id);
+    const { id } = await params;
+
+    const product = await Product.findByIdAndDelete(id);
 
     if (!product) {
       return NextResponse.json(

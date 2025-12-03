@@ -3,22 +3,29 @@ import connectDB from '@/lib/mongodb';
 import Review from '@/models/Review';
 import Product from '@/models/Product';
 
+
+interface SortOptions {
+  [key: string]: 1 | -1;
+}
+
 // GET reviews for a product
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+
+    const { id } = await params;
 
     const { searchParams } = new URL(request.url);
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const order = searchParams.get('order') || 'desc';
 
-    const sortOptions: any = {};
+    const sortOptions: SortOptions = {};
     sortOptions[sortBy] = order === 'asc' ? 1 : -1;
 
-    const reviews = await Review.find({ productId: params.id }).sort(sortOptions);
+    const reviews = await Review.find({ productId: id }).sort(sortOptions);
 
     return NextResponse.json({ success: true, reviews }, { status: 200 });
   } catch (error) {
@@ -33,10 +40,12 @@ export async function GET(
 // POST create new review
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+
+    const { id } = await params;
 
     const body = await request.json();
     const { userId, userName, rating, title, comment, images } = body;
@@ -51,7 +60,7 @@ export async function POST(
 
     // Check if user already reviewed this product
     const existingReview = await Review.findOne({
-      productId: params.id,
+      productId: id,
       userId,
     });
 
@@ -64,7 +73,7 @@ export async function POST(
 
     // Create review
     const review = await Review.create({
-      productId: params.id,
+      productId: id,
       userId,
       userName,
       rating,
@@ -74,13 +83,17 @@ export async function POST(
     });
 
     // Update product rating
-    await updateProductRating(params.id);
+    await updateProductRating(id);
 
     return NextResponse.json({ success: true, review }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating review:', error);
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'Failed to create review';
+    
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to create review' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
