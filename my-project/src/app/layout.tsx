@@ -3,39 +3,38 @@
 import "./globals.css";
 import styles from './layout.module.css';
 import Link from 'next/link';
+import Navbar from "../components/Navbar"
+
 
 
 export const metadata ={
   title: "Handcrafted Haven",
-  description: "Discover a world of creativity and craftsmanship at Handcrafted Haven."
+  description: "Discover a world of creativity and craftsmanship at Handcrafted Haven.",
+  keywords: ["handmade", "crafts", "artisan", "marketplace"],
+  openGraph: {
+    title: "Handcrafted Haven",
+    description: "Explore unique handcrafted items from artisans worldwide",
+    url: "https://your-domain.com",
+    siteName: "Handcrafted Haven",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: "website",
+  }
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={styles.body}>
-        {/* ✅ NAVBAR */}
-        <nav className={styles.navbar}>
-          <div className={styles.logo}>
-            <Link href="/">🎁 Handcrafted Haven</Link>
-          </div>
-
-          <ul className={styles.navLinks}>
-            <li><Link href="/">Home</Link></li>
-            <li><Link href="/marketplace">Marketplace</Link></li>
-            <li><Link href="/about">About</Link></li>
-            <li><Link href="/contact">Contact</Link></li>
-            <li><Link href="/auth">Login</Link></li>
-          </ul>
-        </nav>
-        {/* ✅ PAGE CONTENT */}
+        <Navbar />   {/* <-- Responsive navbar */}
         <main className={styles.main}>{children}</main>
       </body>
     </html>
   );
 }
-
