@@ -18,7 +18,7 @@ export const metadata ={
     siteName: "Handcrafted Haven",
     images: [
       {
-        url: "/og-image.png",
+        url: "/handcrafted-haven-og-image.jpg",
         width: 1200,
         height: 630,
       },
