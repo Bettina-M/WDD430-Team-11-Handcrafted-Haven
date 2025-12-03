@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 
+
+// Define query interface
+interface ProductQuery {
+  category?: string;
+  price?: {
+    $gte?: number;
+    $lte?: number;
+  };
+  $or?: Array<{
+    name?: { $regex: string; $options: string };
+    description?: { $regex: string; $options: string };
+  }>;
+}
+
+// Define sort interface
+interface SortOptions {
+  [key: string]: 1 | -1;
+}
 // GET all products
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +34,7 @@ export async function GET(request: NextRequest) {
     const order = searchParams.get('order') || 'desc';
 
     // Build query
-    const query: any = {};
+    const query: ProductQuery = {};
 
     if (category && category !== 'all') {
       query.category = category;
@@ -36,7 +54,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build sort
-    const sortOptions: any = {};
+    const sortOptions: SortOptions = {};
     sortOptions[sortBy] = order === 'asc' ? 1 : -1;
 
     const products = await Product.find(query).sort(sortOptions);
@@ -79,10 +97,11 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, product }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {  //here i changed to unknown because any was giving was giving type errors
     console.error('Error creating product:', error);
+    const message = error instanceof Error ? error.message : 'Failed to create product';
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to create product' },
+      { success: false, error: message },
       { status: 500 }
     );
   }

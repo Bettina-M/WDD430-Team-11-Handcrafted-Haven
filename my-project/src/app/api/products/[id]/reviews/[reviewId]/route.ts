@@ -6,15 +6,17 @@ import Product from '@/models/Product';
 // PUT update review
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string; reviewId: string } }
+  { params }: { params: Promise<{ id: string; reviewId: string }> } //added Promise type
 ) {
   try {
     await connectDB();
 
+    const { id, reviewId } = await params; // Destructure after awaiting
+
     const body = await request.json();
 
     const review = await Review.findOneAndUpdate(
-      { _id: params.reviewId, productId: params.id },
+      { _id:reviewId, productId:id },
       { $set: body },
       { new: true, runValidators: true }
     );
@@ -27,29 +29,43 @@ export async function PUT(
     }
 
     // Update product rating
-    await updateProductRating(params.id);
+    await updateProductRating(id);
 
     return NextResponse.json({ success: true, review }, { status: 200 });
-  } catch (error: any) {
+  } /*catch (error: any) {
     console.error('Error updating review:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to update review' },
+      { success: false, error: error?.message || 'Failed to update review' },
       { status: 500 }
     );
-  }
+  }*/
+ catch (error: unknown) {
+  console.error('Error updating review:', error);
+  
+  const errorMessage = error instanceof Error 
+    ? error.message 
+    : 'Failed to update review';
+  
+  return NextResponse.json(
+    { success: false, error: errorMessage },
+    { status: 500 }
+  );
+}
 }
 
 // DELETE review
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; reviewId: string } }
+  { params }: { params: Promise<{ id: string; reviewId: string }> }
 ) {
   try {
     await connectDB();
 
+    const { id, reviewId } = await params;
+
     const review = await Review.findOneAndDelete({
-      _id: params.reviewId,
-      productId: params.id,
+      _id: reviewId, // Use destructured reviewId
+      productId: id, // Use destructured id
     });
 
     if (!review) {
@@ -60,7 +76,7 @@ export async function DELETE(
     }
 
     // Update product rating
-    await updateProductRating(params.id);
+   await updateProductRating(id);
 
     return NextResponse.json(
       { success: true, message: 'Review deleted successfully' },
