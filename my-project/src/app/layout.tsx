@@ -19,7 +19,7 @@ export const metadata ={
     siteName: "Handcrafted Haven",
     images: [
       {
-        url: "https://wdd-430-team-11-handcrafted-haven.vercel.app/handcrafted-haven-og-image.jpg",
+        url: "https://wdd-430-team-11-handcrafted-haven.vercel.app/handcrafted_haven.png",
         width: 1200,
         height: 630,
       },
