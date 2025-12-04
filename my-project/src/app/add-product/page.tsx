@@ -183,26 +183,38 @@ export default function AddProductPage() {
     setIsSubmitting(true);
 
     try {
-      const productData: Product = {
-        ...formData,
-        id: `prod_${Date.now()}`,
+      // Prepare product data for API
+      const productData = {
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        category: formData.category,
+        images: formData.images,
         sellerId: user?.id || '',
-        sellerName: user?.name || '',
-        shopName: sellerProfile?.shopName || '',
-        createdAt: new Date().toISOString()
+        sellerName: sellerProfile?.shopName || user?.name || '',
+        stock: formData.stock
       };
 
-      // Get existing products or initialize empty array
-      const existingProducts: Product[] = JSON.parse(localStorage.getItem('products') || '[]');
-      const updatedProducts = [...existingProducts, productData];
-      
-      localStorage.setItem('products', JSON.stringify(updatedProducts));
-      
-      alert('Product added successfully!');
-      router.push('/seller-dashboard');
+      // Send to MongoDB via API
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Product added successfully! It will appear in the marketplace.');
+        router.push('/marketplace');
+      } else {
+        throw new Error(data.error || 'Failed to add product');
+      }
     } catch (error) {
       console.error('Error adding product:', error);
-      alert('Error adding product. Please try again.');
+      alert(`Error adding product: ${error instanceof Error ? error.message : 'Please try again'}`);
     } finally {
       setIsSubmitting(false);
     }
