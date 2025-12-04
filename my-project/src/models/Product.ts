@@ -6,7 +6,7 @@ export interface IProduct extends Document {
   price: number;
   category: string;
   images: string[];
-  sellerId: mongoose.Types.ObjectId;
+  sellerId: string;
   sellerName: string;
   stock: number;
   averageRating: number;
@@ -36,15 +36,27 @@ const ProductSchema: Schema = new Schema(
     category: {
       type: String,
       required: [true, 'Please provide a category'],
-      enum: ['Jewelry', 'Pottery', 'Textiles', 'Woodwork', 'Home Decor', 'Art', 'Other'],
+      enum: [
+        'Jewelry & Accessories',
+        'Home Decor',
+        'Art & Paintings',
+        'Textiles & Fabrics',
+        'Woodworking',
+        'Pottery & Ceramics',
+        'Candles & Soaps',
+        'Leather Goods',
+        'Metal Work',
+        'Paper Crafts',
+        'Glass Work',
+        'Other'
+      ],
     },
     images: {
       type: [String],
       default: [],
     },
     sellerId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
+      type: String,
       required: true,
     },
     sellerName: {
