@@ -110,3 +110,46 @@
   background-color: #c87b5e;
   color: white;
 }
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  
+}
+
+.buttonGroup button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background-color: #c87b5e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    padding:1rem;
+    text-align: center;
+  }
+
+  .logiutButton {
+    margin-top: 1.5rem;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    justify-content: center;
+  }
+
+  .card {
+    width: 90%;            
+    margin: 0 auto;       
+  }
+}

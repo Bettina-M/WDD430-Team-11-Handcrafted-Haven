@@ -35,7 +35,7 @@
 }
 
 .explore-btn {
-  background-color: #000;
+  background-color: #c87b5e;
   color: #fff;
   padding: 0.8rem 2rem;
   border-radius: 6px;
@@ -46,4 +46,12 @@
 
 .explore-btn:hover {
   opacity: 0.8;
+}
+
+@media (max-width: 600px){
+  .explore-btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
 }

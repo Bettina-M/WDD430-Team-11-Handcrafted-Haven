@@ -3,7 +3,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 2rem 2rem;
   background: #c87b5e;
   border-bottom: 1px solid #eee;
   position: relative;
@@ -11,7 +11,7 @@
 
 /* LOGO */
 .logo a {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: bold;
   text-decoration: none;
 }

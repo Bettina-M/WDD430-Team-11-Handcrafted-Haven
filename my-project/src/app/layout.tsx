@@ -4,6 +4,7 @@ import "./globals.css";
 import styles from './layout.module.css';
 import Link from 'next/link';
 import Navbar from "../components/Navbar"
+import Footer from "../components/footer"
 
 
 
@@ -14,11 +15,11 @@ export const metadata ={
   openGraph: {
     title: "Handcrafted Haven",
     description: "Explore unique handcrafted items from artisans worldwide",
-    url: "https://your-domain.com",
+    url: "https://wdd-430-team-11-handcrafted-haven.vercel.app/",
     siteName: "Handcrafted Haven",
     images: [
       {
-        url: "/handcrafted-haven-og-image.jpg",
+        url: "https://wdd-430-team-11-handcrafted-haven.vercel.app/handcrafted-haven-og-image.jpg",
         width: 1200,
         height: 630,
       },
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={styles.body}>
         <Navbar />   {/* <-- Responsive navbar */}
         <main className={styles.main}>{children}</main>
+        <Footer />   {/* <-- Footer component */}
       </body>
     </html>
   );
